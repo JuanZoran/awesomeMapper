@@ -11,10 +11,8 @@ local M = {
 ---@param key key
 function M.handle(grabber, modifiers, key)
     -- TODO :
-    print 'Key is pressed:'
-    print(table.concat(modifiers, ' + '), key)
+    print('Modifiers: ', modifiers, 'Key:', key)
 end
-
 
 function M.exec()
     local grabber = awful.keygrabber {
@@ -25,11 +23,10 @@ function M.exec()
     }
     conf.grabber = grabber
 
-    mapper.keymap.map(conf.trigger, function()
+    mapper.keymap.set(conf.trigger, function()
         grabber:start()
     end)
-
-    mapper.keymap.setup()
+    -- mapper.keymap.setup()
 end
 
 ---@class Mapper
