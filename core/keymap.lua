@@ -1,7 +1,7 @@
 local util = mapper.util
 local awful = require 'awful'
-local empty_dict = {}
--- local ruled = require 'ruled'
+local k = awful.key
+local btn = awful.button
 
 local function setup()
     --- TODO :
@@ -14,27 +14,23 @@ local function rawmap(mode, key, action, opts)
     --- TODO :
 end
 
-local get_key = (function()
-    local k = awful.key
-    ---@param key string|string[]
-    ---@param action function
-    return function(key, action)
-        local modifiers, _key
-        if type(key) == 'string' then
-            modifiers, _key = {}, key
-        else
-            _key = key[#key]
-            key[#key] = nil
-            modifiers = key
-        end
-        return k(modifiers, _key, action)
+---@param key any|any[]
+local function parse_key(key)
+    if type(key) == 'table' then
+        local _key = key[#key]
+        key[#key] = nil
+
+        return key, _key
     end
-end)()
+
+    return {}, key
+end
+
 
 local function client_map(key, action, opts)
     -- opts = opts or empty_dict
-    local _key = get_key(key, action)
-    awful.keyboard.append_client_keybinding(_key)
+    local modifiers, _key = parse_key(key)
+    awful.keyboard.append_client_keybinding(k(modifiers, _key, action))
 end
 
 
@@ -44,13 +40,60 @@ end
 ---@param opts table?
 local function map(key, action, opts)
     -- TODO : Handle opts
-    opts = opts or empty_dict
+    opts = opts or {}
     if opts.client then
         return client_map(key, action, opts)
     end
 
-    local _key = get_key(key, action)
-    awful.keyboard.append_global_keybinding(_key)
+    local modifiers, _key = parse_key(key)
+    awful.keyboard.append_global_keybinding(k(modifiers, _key, action))
+end
+
+
+---A Simple wrapper for global keybindings
+---@param vim_key string
+---@param action function
+---@param opts table?
+local function client_set(vim_key, action, opts)
+    local modifiers, _key = mapper.parser.vimkey_to_key(vim_key)
+    awful.keyboard.append_client_keybinding(k(modifiers, _key, action))
+end
+
+---A Simple wrapper for global keybindings
+---@param vim_key string
+---@param action function
+---@param opts table?
+local function set(vim_key, action, opts)
+    -- TODO : Handle opts
+    opts = opts or {}
+    if opts.client then
+        return client_map(vim_key, action, opts)
+    end
+
+    local modifiers, _key = mapper.parser.vimkey_to_key(vim_key)
+    awful.keyboard.append_global_keybinding(k(modifiers, _key, action))
+end
+
+
+---A Simple wrapper for global mouse bindings
+---@param button integer|table # The button to bind.
+---@param on_press function?
+---@param on_release function?
+local function mouse(button, on_press, on_release)
+    local modifiers, key = parse_key(button)
+    local _botton = btn(modifiers, key, on_press, on_release)
+    awful.mouse.append_global_mousebinding(_botton)
+end
+
+
+---A Simple wrapper for global mouse bindings
+---@param button integer|table # The button to bind.
+---@param on_press function?
+---@param on_release function?
+local function client_mouse(button, on_press, on_release)
+    local modifiers, key = parse_key(button)
+    local _botton = btn(modifiers, key, on_press, on_release)
+    awful.mouse.append_client_mousebinding(_botton)
 end
 
 
@@ -64,8 +107,10 @@ return {
     setup = setup,
     map = map,
     client_map = client_map,
-    -- global_key = util.list(),
-    -- client_key = util.list(),
+    mouse = mouse,
+    client_mouse = client_mouse,
+    set = set,
+    client_set = client_set,
 }
 
 -- return setmetatable(M, {

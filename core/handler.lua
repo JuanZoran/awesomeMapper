@@ -16,7 +16,6 @@ function M.handle(grabber, modifiers, key)
 end
 
 
-
 function M.exec()
     local grabber = awful.keygrabber {
         stop_key            = conf.stop_key,
@@ -29,7 +28,6 @@ function M.exec()
     mapper.keymap.map(conf.trigger, function()
         grabber:start()
     end)
-
 
     mapper.keymap.setup()
 end
