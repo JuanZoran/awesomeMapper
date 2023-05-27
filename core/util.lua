@@ -12,8 +12,9 @@ function M.defaulttable(create)
     end
     return setmetatable({}, {
         __index = function(tbl, key)
-            rawset(tbl, key, create(key))
-            return rawget(tbl, key)
+            local value = create(key)
+            rawset(tbl, key, value)
+            return value
         end,
     })
 end

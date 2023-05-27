@@ -10,8 +10,9 @@ local current_path = ... .. '.'
 ---@field mode mode current mode
 local M = setmetatable({}, {
     __index = function(self, key)
-        self[key] = require(current_path .. 'core.' .. key)
-        return self[key]
+        local v = require(current_path .. 'core.' .. key)
+        rawset(self, key, v)
+        return v
     end,
 })
 
@@ -25,6 +26,16 @@ local conf = {
     stop_callback = nil, ---@type stop_callback?
     trigger       = nil, ---@type string
     grabber       = nil, ---@type grabber
+    ignored_keys = {
+        Control_L = true,
+        Control_R = true,
+        Shift_L   = true,
+        Shift_R   = true,
+        Super_L   = true,
+        Super_R   = true,
+        Alt_L     = true,
+        Alt_R     = true,
+    },
 }
 
 
@@ -45,7 +56,6 @@ function M.setup(opts)
 
     M.handler.exec()
 end
-
 
 --- Export this module
 _G.mapper = M
