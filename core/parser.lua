@@ -102,25 +102,6 @@ local function key_to_vimkey(modifiers, key)
 end
 
 
-local fake_input = root.fake_input
-local run = awful.spawn
----Feed vim-like key to awesome
----@param vim_key string
-local function feedkey(vim_key)
-    -- FIXME : To Get Current modifiers so that we can release them
-
-    -- local modifiers, key = vimkey_to_key(vim_key)
-    -- local size = #modifiers
-    --
-    -- for i = 1, size do fake_input('key_press', modifiers[i]) end
-    -- fake_input('key_press', key)
-    -- fake_input('key_release', key)
-    -- for i = size, 1, -1 do fake_input('key_release', modifiers[i]) end
-
-    -- run('xdotool key ' .. vim_key)
-    -- run('xdotool type ' .. vim_key)
-end
-
 
 ---@class Mapper
 ---@field parser MapperParser
@@ -131,5 +112,4 @@ return {
     split_to_keys = split_to_keys,
     vimkey_to_key = vimkey_to_key,
     key_to_vimkey = key_to_vimkey,
-    feedkey       = feedkey,
 }

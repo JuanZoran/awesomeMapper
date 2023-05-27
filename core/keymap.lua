@@ -1,4 +1,3 @@
-local util = mapper.util
 local awful = require 'awful'
 ---@alias keymap string|any[]
 
@@ -39,53 +38,51 @@ local function pipe(getkey_fun, set_fun)
     end
 end
 
+
 local kb  = awful.keyboard
-local set = pipe(vim_key, kb.append_global_keybinding)
-
-
----@type MapperTrigger[]
-local triggers = setmetatable({}, {
-    __index = function(self, vim_key_trigger)
-        local new_trigger = mapper.trigger.new(vim_key_trigger)
-        set(vim_key_trigger, new_trigger)
-        rawset(self, vim_key_trigger, new_trigger)
-        return new_trigger
-    end,
-})
-
-local split_to_keys = mapper.parser.split_to_keys
-local function set_keymap(str, action)
-    -- INFO : Check if is mulitple keymap
-    local keys, size = split_to_keys(str)
-    assert(size > 0, str)
-    local trig = keys[1]
-    -- if is single keymap then just set the keymap
-    if size == 1 then return set(trig, action) end
-
-    -- else if is list then generate a grabber
-    --      Check if already exists a grabber if not then generate a new one
-    local cur = triggers[trig]
-    -- find the last keymap processor
-    for i = 2, size - 1 do cur = cur[keys[i]] end
-    cur[keys[size]] = action
-end
-
 local add_global_key = kb.append_global_keybinding
-
 ---@class Mapper
 ---@field keymap MapperMap
 ---@class MapperMap
 ---@operator call: fun(mode)
 return {
-    mode_map       = util.defaulttable(),
     map            = pipe(pack_key, add_global_key),
-    client_map     = pipe(pack_key, kb.append_client_keybinding),
-    set            = set,
-    set_keymap     = set_keymap,
+    set            = pipe(vim_key, kb.append_global_keybinding),
     client_set     = pipe(vim_key, kb.append_client_keybinding),
     add_global_key = add_global_key,
 
     mouse          = pipe(pack_mouse, awful.mouse.append_global_mousebinding),
     client_mouse   = pipe(pack_mouse, awful.mouse.append_client_mousebinding),
     vim_key        = vim_key,
+
+    -- client_map     = pipe(pack_key, kb.append_client_keybinding),
+    -- set_keymap     = set_keymap,
 }
+
+-- ---@type MapperTrigger[]
+-- local triggers = setmetatable({}, {
+--     __index = function(self, vim_key_trigger)
+--         local new_trigger = mapper.trigger.new(vim_key_trigger)
+--         set(vim_key_trigger, new_trigger)
+--         rawset(self, vim_key_trigger, new_trigger)
+--         return new_trigger
+--     end,
+-- })
+--
+-- local split_to_keys = mapper.parser.split_to_keys
+-- local function set_keymap(str, action)
+--     -- INFO : Check if is mulitple keymap
+--     local keys, size = split_to_keys(str)
+--     assert(size > 0, str)
+--     local trig = keys[1]
+--     -- if is single keymap then just set the keymap
+--     if size == 1 then return set(trig, action) end
+--
+--     -- else if is list then generate a grabber
+--     --      Check if already exists a grabber if not then generate a new one
+--     local cur = triggers[trig]
+--     -- find the last keymap processor
+--     for i = 2, size - 1 do cur = cur[keys[i]] end
+--     cur[keys[size]] = action
+-- end
+--

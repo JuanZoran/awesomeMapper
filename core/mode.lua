@@ -39,14 +39,21 @@ function M:set(vim_key, action)
 end
 
 local create_trigger = mapper.trigger.new
-
+---@class list
+local list_mt = {
+    append = function(self, value)
+        self.size = self.size + 1
+        self[self.size] = value
+    end,
+}
+list_mt.__index = list_mt
 ---Create a new mode
 ---@param name string
 ---@return MapperMode
 function M.new(name)
     local instance = setmetatable({
         keymaps = {},
-        keys = mapper.util.list(),
+        keys = setmetatable({ size = 0 }, list_mt),
         name = name,
     }, M)
 

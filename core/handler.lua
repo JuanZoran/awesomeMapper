@@ -1,4 +1,5 @@
 local new_mode = mapper.mode.new
+local default_mode = 'default'
 ---@class MapperHandler
 local M = {
     ignored_keys = {
@@ -12,24 +13,62 @@ local M = {
         Alt_R     = true,
     },
     modes = {
-        [''] = new_mode '',
+        [default_mode] = new_mode(default_mode),
     },
-    current_mode = '',
+    default_mode = default_mode,
+    current_mode = default_mode,
 }
 
 function M.get_mode(name)
     return M.modes[name]
 end
 
-function M.new_mode(name)
+do
+    function M.switch_to_mode(name)
+        print('Now Switch to mode:' .. name)
+        M.current_mode = name
+        root.keys(M.modes[name].keys)
+    end
+
+    local function get_key(tbl, key)
+        return tbl[key]
+    end
+
+    M.switch_to_mode_func = setmetatable({}, {
+        __index = function(tbl, name)
+            local res = function() M.switch_to_mode(name) end
+            rawset(tbl, name, res)
+            return res
+        end,
+        __call = get_key,
+    })
+
+    M.bind_mode_map = setmetatable({}, {
+        __index = function(tbl, mode)
+            local _mode = mapper.handler.get_mode(mode)
+            local res = function(...) _mode:set(...) end
+            rawset(tbl, mode, res)
+            return res
+        end,
+        __call = get_key,
+    })
+end
+
+---Create a new mode
+---@param name string
+---@param trigger? string vim-like key in default mode to switch to this mode
+---@return MapperMode
+function M.new_mode(name, trigger)
     local mode = new_mode(name)
+    if trigger then
+        M.modes[default_mode]:add_single_key(trigger, M.switch_to_mode_func(name))
+    end
     M.modes[name] = mode
     return mode
 end
 
-function M.switch_to_mode(name)
-    M.current_mode = name
-    root.keys(M.modes[name].keys)
+function M.set(mode, vim_key, action)
+    M.modes[mode]:set(vim_key, action)
 end
 
 ---@class Mapper
