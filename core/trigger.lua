@@ -4,8 +4,13 @@ local keygrabber = require 'awful.keygrabber'
 ---@field grabber table @awesome keygrabber
 ---@field trigger string @trigger key
 ---@field cur MapperTransformer @current transformer
+---@operator call: function
 local M = mapper.transformer.clone()
 local set_default_tbl = mapper.transformer.set_default_tbl
+
+M.__call = function(self)
+    self.grabber:start()
+end
 M.__index = function(tbl, key)
     if M[key] then return M[key] end
     return set_default_tbl(tbl, key)
@@ -16,9 +21,21 @@ function M:fallback()
     self.cur = self
 end
 
-local ignored_eys = mapper.conf.ignored_keys
+local function callable(value)
+    local valueType = type(value)
+    if valueType == 'function' then
+        return true
+    elseif valueType == 'table' then
+        local metatable = getmetatable(value)
+        return metatable and metatable.__call ~= nil
+    end
+
+    return false
+end
+
+
 function M:invoke(_, modifiers, key)
-    if ignored_eys[key] then
+    if mapper.handler.ignored_keys[key] then
         return
     end
 
@@ -31,18 +48,13 @@ function M:invoke(_, modifiers, key)
     end
 
     ---@type MapperTransformer
-    if type(res) == 'function' then
-        self:fallback()
+    if callable(res) then
+        self.cur = self -- reset the state pointer
         return res()
     end
 
+    ---@cast res MapperTransformer
     self.cur = res
-end
-
-function M:start_func()
-    return function()
-        self.grabber:start()
-    end
 end
 
 -- local default_stop_key = mapper.conf.stop_key

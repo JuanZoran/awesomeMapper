@@ -54,7 +54,7 @@ local function vimkey_to_key(vim_key)
     if #vim_key == 1 then
         -- check if it is a upper case
         if vim_key:match '%u' then
-            return { 'Shift' }, vim_key
+            return { 'Shift' }, vim_key:lower()
         else
             return {}, vim_key
         end

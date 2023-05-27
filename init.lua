@@ -7,7 +7,6 @@ local current_path = ... .. '.'
 
 ---@class Mapper
 ---@field conf MapperConfig
----@field mode mode current mode
 local M = setmetatable({}, {
     __index = function(self, key)
         local v = require(current_path .. 'core.' .. key)
@@ -15,7 +14,6 @@ local M = setmetatable({}, {
         return v
     end,
 })
-
 
 ---@alias stop_callback fun(grabber, stop_key, stop_event, sequence)
 
@@ -38,23 +36,10 @@ local conf = {
     },
 }
 
-
 ---Load user conf and set key map
 ---@param opts MapperConfig
 function M.setup(opts)
-    -- TODO :Handle opts
-    for k, v in pairs(opts) do
-        conf[k] = v
-    end
-
-    local awful = require 'awful'
     M.conf = conf
-    M.mode = conf.init_mode
-
-
-    assert(conf.trigger, 'Mapper.setup: opts.trigger is required')
-
-    M.handler.exec()
 end
 
 --- Export this module
