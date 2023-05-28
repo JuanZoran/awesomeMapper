@@ -1,3 +1,4 @@
+local helper = mapper.helper
 ---@class Mapper
 ---@field util MapperUtil
 ---@class MapperUtil
@@ -37,8 +38,11 @@ end
 -- Export some functions from mapper.handler
 local mapper        = mapper
 M.switch_to_mode    = mapper.switch_to_mode_func
-M.switch_to_default = mapper.switch_to_mode_func(mapper.default_mode.name)
+local default_name  = mapper.default_mode.name
+M.switch_to_default = mapper.switch_to_mode_func(default_name)
 M.bind_mode_map     = mapper.bind_mode_map
+M.global_map        = mapper.bind_mode_map(default_name)
+
 
 do
     -- FIXME :
@@ -66,9 +70,23 @@ do
     end
 end
 
+---@alias client table
+
+---utility for client map in mode map
+---@param func fun(client:client)
+---@return function
+M.with_client = function(func)
+    return function()
+        local c = client.focus
+        if c then func(c) end
+    end
+end
+
+M.toggle_client = helper.cache_func(function(field)
+    return function(c) c[field] = not c[field] end
+end)
 
 return M
-
 -- local fake_input = root.fake_input
 -- local run = awful.spawn
 -- ---Feed vim-like key to awesome

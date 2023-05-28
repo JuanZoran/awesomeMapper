@@ -20,11 +20,13 @@ local M = {
 
 setmetatable(M, {
     __index = function(self, key)
-        local v = require(current_path .. 'core.' .. key)
+        local v = require(current_path .. key)
         rawset(self, key, v)
         return v
     end,
 })
+
+---@type Mapper
 M = require 'gears.object' { class = M }
 
 ---@class MapperConfig
@@ -55,16 +57,9 @@ do
     end
 
     M.switch_to_mode = switch_to_mode
-    M.switch_to_mode_func = setmetatable({}, {
-        __index = function(tbl, name)
-            local res = function() switch_to_mode(name) end
-            rawset(tbl, name, res)
-            return res
-        end,
-        __call = function(tbl, key)
-            return tbl[key]
-        end,
-    })
+    M.switch_to_mode_func = M.helper.cache_func(function(name)
+        return function() switch_to_mode(name) end
+    end)
 end
 
 ---Create a new mode
@@ -87,7 +82,7 @@ end
 
 M.setup = function(opts)
     M.conf = opts
-    M.default_mode = M.new_mode 'default'
+    M.default_mode = M.new_mode 'normal'
     M.current_mode = M.default_mode
 end
 
