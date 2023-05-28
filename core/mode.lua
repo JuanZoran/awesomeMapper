@@ -16,7 +16,7 @@ function M:add_single_key(vim_key, action)
     local new_key = keymap.vim_key(vim_key, action)
     self.keymaps[vim_key] = new_key
 
-    if self.name == mapper.handler.current_mode then
+    if self.name == mapper.current_mode.name then
         keymap.add_global_key(new_key, action)
     end
     self.keys:append(new_key)

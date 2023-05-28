@@ -25,7 +25,7 @@ do
     end
 end
 
-M.wrap_func = function(func)
+M.wrap_func         = function(func)
     return function(...)
         local args = ...
         return function()
@@ -35,10 +35,10 @@ M.wrap_func = function(func)
 end
 
 -- Export some functions from mapper.handler
-local handler = mapper.handler
-M.switch_to_mode = handler.switch_to_mode_func
-M.switch_to_default = handler.switch_to_mode_func(handler.default_mode)
-M.bind_mode_map = handler.bind_mode_map
+local mapper        = mapper
+M.switch_to_mode    = mapper.switch_to_mode_func
+M.switch_to_default = mapper.switch_to_mode_func(mapper.default_mode.name)
+M.bind_mode_map     = mapper.bind_mode_map
 
 do
     -- FIXME :

@@ -35,7 +35,7 @@ end
 
 
 function M:invoke(_, modifiers, key)
-    if mapper.handler.ignored_keys[key] then
+    if mapper.conf.ignored_keys[key] then
         return
     end
 
