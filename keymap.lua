@@ -23,7 +23,6 @@ end
 local k = awful.key.new
 local btn = awful.button
 local vim_key = handle_first_arg_to(mapper.parser.vimkey_to_key, k)
-local pack_key = handle_first_arg_to(parse_key, k)
 local pack_mouse = handle_first_arg_to(parse_key, btn)
 
 
@@ -46,7 +45,6 @@ local add_global_key = kb.append_global_keybinding
 ---@class MapperMap
 ---@operator call: fun(mode)
 return {
-    map            = pipe(pack_key, add_global_key),
     set            = pipe(vim_key, kb.append_global_keybinding),
     client_set     = pipe(vim_key, kb.append_client_keybinding),
     add_global_key = add_global_key,
@@ -54,9 +52,6 @@ return {
     mouse          = pipe(pack_mouse, awful.mouse.append_global_mousebinding),
     client_mouse   = pipe(pack_mouse, awful.mouse.append_client_mousebinding),
     vim_key        = vim_key,
-
-    -- client_map     = pipe(pack_key, kb.append_client_keybinding),
-    -- set_keymap     = set_keymap,
 }
 
 -- ---@type MapperTrigger[]

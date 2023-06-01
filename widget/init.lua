@@ -26,19 +26,15 @@ local mode_color = setmetatable({}, {
 ---@field widget function get the widget
 return function(opts)
     -- require'gears.table.merge'(conf)
-    local mapper = mapper
 
-    local get_mode_name = conf.get_mode_name
+    local get_mode_name     = conf.get_mode_name
     local current_mode_name = get_mode_name(mapper.current_mode)
-    local textbox = require 'wibox.widget.textbox' (current_mode_name)
-    mapper:connect_signal('mode::change', function(_, _, to)
-        textbox:set_text(get_mode_name(to))
-    end)
+    local textbox           = require 'wibox.widget.textbox' (current_mode_name)
 
-    local container = require 'wibox.container'
-    local c         = mode_color[current_mode_name]
+    local container         = require 'wibox.container'
+    local c                 = mode_color[current_mode_name]
 
-    local widget    = require 'wibox.widget' {
+    local widget            = require 'wibox.widget' {
         container.margin(textbox, 10, 10),
         widget = container.background,
         bg = c.bg,
@@ -46,7 +42,8 @@ return function(opts)
         shape = require 'gears.shape'.rounded_rect,
     }
 
-    mapper:connect_signal('mode::change', function(_, _, to)
+    awesome.connect_signal('mode::change', function(_, to)
+        textbox:set_text(get_mode_name(to))
         widget.bg = mode_color[get_mode_name(to)].bg
     end)
     return widget

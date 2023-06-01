@@ -1,4 +1,4 @@
----@class MapperMode
+---@class MapperMode:gObject
 ---@field keymaps table<string, function|table>
 ---@field keys list generated from keymaps
 ---@field name string current mode name
@@ -6,6 +6,7 @@ local M = {
 }
 
 M.__index = M
+
 
 ---@class Mapper
 ---@field mode MapperMode
@@ -38,35 +39,44 @@ function M:set(vim_key, action)
     cur[keys[size]] = action
 end
 
-local create_trigger = mapper.trigger.new
----@class list
-local list_mt = {
-    append = function(self, value)
-        self.size = self.size + 1
-        self[self.size] = value
-    end,
-}
-list_mt.__index = list_mt
----Create a new mode
----@param name string
----@return MapperMode
-function M.new(name)
-    local instance = setmetatable({
-        keymaps = {},
-        keys = setmetatable({ size = 0 }, list_mt),
-        name = name,
-    }, M)
-
-    setmetatable(instance.keymaps, {
+do
+    local create_trigger = mapper.trigger.new
+    local keymap_mt = {
         __index = function(self, vim_key_trigger)
             local new_trigger = create_trigger(vim_key_trigger)
-            instance:add_single_key(vim_key_trigger, new_trigger)
+            self:add_single_key(vim_key_trigger, new_trigger)
 
             rawset(self, vim_key_trigger, new_trigger)
             return new_trigger
         end,
-    })
-    return instance
+    }
+
+    ---@class list
+    local list_mt = {
+        append = function(self, value)
+            self.size = self.size + 1
+            self[self.size] = value
+        end,
+    }
+
+    list_mt.__index = list_mt
+    local set_object = require 'gears.object'
+
+    ---Create a new mode
+    ---@param name string
+    ---@return MapperMode
+    function M.new(name)
+        local instance = setmetatable({
+            keymaps = {},
+            keys = setmetatable({ size = 0 }, list_mt),
+            name = name,
+        }, M)
+
+        setmetatable(instance.keymaps, keymap_mt)
+
+        --
+        return set_object { class = instance }
+    end
 end
 
 return M

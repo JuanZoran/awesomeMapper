@@ -28,12 +28,14 @@ end
 
 M.wrap_func         = function(func)
     return function(...)
-        local args = ...
+        local args = { ... }
         return function()
-            return func(args)
+            return func(unpack(args))
         end
     end
 end
+
+M.run               = M.wrap_func(awful.spawn)
 
 -- Export some functions from mapper.handler
 local mapper        = mapper
@@ -85,6 +87,18 @@ end
 M.toggle_client = helper.cache_func(function(field)
     return function(c) c[field] = not c[field] end
 end)
+
+
+---Execute a function and then switch to default mode
+---@param func fun()
+---@return fun()
+M.with_exec = function(func)
+    return function()
+        func()
+        M.switch_to_default()
+    end
+end
+
 
 return M
 -- local fake_input = root.fake_input

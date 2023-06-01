@@ -26,9 +26,6 @@ setmetatable(M, {
     end,
 })
 
----@type Mapper
-M = require 'gears.object' { class = M }
-
 ---@class MapperConfig
 local conf = {
     ignored_keys = {
@@ -47,10 +44,14 @@ function M.get_mode(name)
     return M.modes[name]
 end
 
+local emit_signal = awesome.emit_signal
 do
     local function switch_to_mode(name)
         local to = M.modes[name]
-        M:emit_signal('mode::change', M.current_mode, to)
+        local from = M.current_mode
+        emit_signal('mode::change', from, to)
+        from:emit_signal('leave', from)
+        to:emit_signal('enter', to)
 
         M.current_mode = to
         root.keys(to.keys)
@@ -68,7 +69,7 @@ end
 ---@return MapperMode, fun(vim_key:keymap, action:function|table)
 function M.new_mode(name, trigger)
     local mode = M.mode.new(name)
-    M:emit_signal('mode::new', mode)
+    emit_signal('mode::new', mode)
 
     if trigger then
         M.default_mode:add_single_key(trigger, M.switch_to_mode_func(name))
